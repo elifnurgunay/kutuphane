@@ -1,5 +1,8 @@
+import { lazy, Suspense } from "react";
+import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
+import { LoadingState } from "./components/ui";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { BookDetailPage } from "./features/books/BookDetailPage";
 import { BookFormPage } from "./features/books/BookFormPage";
@@ -19,7 +22,18 @@ import { ProfilePage } from "./features/me/ProfilePage";
 import { useAuth } from "./lib/useAuth";
 import { homePathFor, STAFF_ROLES } from "./lib/roles";
 import { LoginPage } from "./pages/LoginPage";
-import { StaffHomePage } from "./pages/StaffHomePage";
+
+// Grafik kütüphanesi büyük olduğundan rapor sayfaları ayrı parça olarak yüklenir.
+const DashboardPage = lazy(() =>
+  import("./features/reports/DashboardPage").then((m) => ({ default: m.DashboardPage })),
+);
+const ReportsPage = lazy(() =>
+  import("./features/reports/ReportsPage").then((m) => ({ default: m.ReportsPage })),
+);
+
+function Lazy({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<LoadingState />}>{children}</Suspense>;
+}
 
 function HomeRedirect() {
   const { user } = useAuth();
@@ -33,7 +47,22 @@ export function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route element={<ProtectedRoute roles={STAFF_ROLES} />}>
-            <Route path="/panel" element={<StaffHomePage />} />
+            <Route
+              path="/panel"
+              element={
+                <Lazy>
+                  <DashboardPage />
+                </Lazy>
+              }
+            />
+            <Route
+              path="/raporlar"
+              element={
+                <Lazy>
+                  <ReportsPage />
+                </Lazy>
+              }
+            />
             <Route path="/islem" element={<QuickTransactionPage />} />
             <Route path="/oduncler" element={<LoanListPage />} />
             <Route path="/rezervasyonlar" element={<ReservationListPage />} />

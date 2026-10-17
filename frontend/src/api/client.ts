@@ -76,7 +76,8 @@ function refreshTokens(): Promise<boolean> {
   return refreshInFlight;
 }
 
-export async function apiFetch<T>(path: string, init: RequestInit = {}, retry = true): Promise<T> {
+/** Yetkili istek atar; 401'de bir kez token yeniler. Hata yanıtlarını ApiError'a çevirir. */
+async function request(path: string, init: RequestInit, retry: boolean): Promise<Response> {
   const headers = new Headers(init.headers);
   if (init.body !== undefined) headers.set("Content-Type", "application/json");
   const accessToken = tokenStore.access;
@@ -85,11 +86,27 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, retry = 
   const response = await fetch(`${API_BASE}${path}`, { ...init, headers });
 
   if (response.status === 401 && retry && !NO_REFRESH_PATHS.includes(path) && tokenStore.refresh) {
-    if (await refreshTokens()) return apiFetch<T>(path, init, false);
+    if (await refreshTokens()) return request(path, init, false);
     tokenStore.clear();
     onUnauthorized();
   }
   if (!response.ok) throw await toApiError(response);
+  return response;
+}
+
+export async function apiFetch<T>(path: string, init: RequestInit = {}, retry = true): Promise<T> {
+  const response = await request(path, init, retry);
   if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
+}
+
+/** Dosya yanıtını (ör. CSV) indirir. */
+export async function apiDownload(path: string, filename: string): Promise<void> {
+  const response = await request(path, {}, true);
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
 }
