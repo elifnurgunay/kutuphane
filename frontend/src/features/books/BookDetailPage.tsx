@@ -69,6 +69,7 @@ export function BookDetailPage() {
       <Card>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
+            <p className="font-mono text-xs text-ink/60">Kitap no {data.id}</p>
             <h1 className="text-xl font-semibold text-brand">{data.title}</h1>
             {data.subtitle && <p className="text-ink/70">{data.subtitle}</p>}
           </div>

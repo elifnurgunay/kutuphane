@@ -26,6 +26,7 @@ import {
   type Loan,
   type ReturnResponse,
 } from "./api";
+import { BarcodeFinder } from "./BarcodeFinder";
 import { classifyScan } from "./scan";
 
 type Pending =
@@ -69,9 +70,13 @@ export function QuickTransactionPage() {
   const refocus = () => setTimeout(() => inputRef.current?.focus(), 0);
   const fail = (error: unknown) => setNotice({ tone: "error", lines: [errorMessage(error)] });
 
-  async function handleScan(event: FormEvent) {
+  function handleScan(event: FormEvent) {
     event.preventDefault();
-    const value = scan.trim();
+    void processScan(scan);
+  }
+
+  async function processScan(raw: string) {
+    const value = raw.trim();
     const kind = classifyScan(value);
     if (kind === "empty") return;
     setScan("");
@@ -147,7 +152,7 @@ export function QuickTransactionPage() {
       <h1 className="text-xl font-semibold text-brand">Hızlı İşlem</h1>
 
       <Card>
-        <form onSubmit={(e) => void handleScan(e)} className="flex flex-wrap gap-3">
+        <form onSubmit={handleScan} className="flex flex-wrap gap-3">
           <input
             ref={inputRef}
             autoFocus
@@ -185,6 +190,9 @@ export function QuickTransactionPage() {
             ))}
           </div>
         )}
+        <div className="mt-3">
+          <BarcodeFinder onPick={(barcode) => void processScan(barcode)} />
+        </div>
       </Card>
 
       {pending && (

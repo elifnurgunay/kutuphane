@@ -118,6 +118,7 @@ export function BookListPage() {
               <table className="w-full text-left text-sm">
                 <thead className="border-b border-sage text-brand">
                   <tr>
+                    <th className="py-2 pr-4">No</th>
                     <th className="py-2 pr-4">Başlık</th>
                     <th className="py-2 pr-4">Yazar</th>
                     <th className="py-2 pr-4">Yayınevi</th>
@@ -128,6 +129,7 @@ export function BookListPage() {
                 <tbody>
                   {books.data.items.map((book) => (
                     <tr key={book.id} className="border-b border-sage/40 hover:bg-sage/20">
+                      <td className="py-2 pr-4 font-mono text-ink/70">{book.id}</td>
                       <td className="py-2 pr-4">
                         <Link to={`/kitaplar/${book.id}`} className="font-medium text-brand">
                           {book.title}

@@ -13,3 +13,8 @@ dist/
 
 # Ortam
 .env
+
+# Editör
+.vs/
+.vscode/
+.idea/

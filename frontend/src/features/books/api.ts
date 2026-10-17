@@ -107,11 +107,12 @@ const keys = {
   copies: (id: number) => ["books", "copies", id] as const,
 };
 
-export function useBooks(query: BookQuery) {
+export function useBooks(query: BookQuery, enabled = true) {
   return useQuery({
     queryKey: keys.list(query),
     queryFn: () => apiFetch<Page<BookSummary>>(`/books${toQueryString({ ...query })}`),
     placeholderData: (previous) => previous,
+    enabled,
   });
 }
 
