@@ -139,3 +139,15 @@ def test_search_reservations(w):
     assert items[0].member.id == member.id
     items, total = svc.search_reservations(w.db, None, None, ReservationStatus.READY, 1, 10)
     assert total == 0
+
+
+def test_member_can_only_cancel_own_reservation(w):
+    [copy] = w.book()
+    w.issue(w.member(), copy)
+    owner, other = w.member(), w.member()
+    reservation = _reserve(w, owner, copy)
+
+    code = _error_code(svc.cancel_reservation, w.db, reservation.id, member_id=other.id)
+    assert code == ErrorCode.FORBIDDEN
+    svc.cancel_reservation(w.db, reservation.id, member_id=owner.id)
+    assert reservation.status == ReservationStatus.CANCELLED

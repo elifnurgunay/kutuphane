@@ -159,10 +159,12 @@ class ReturnResult:
     reservation: Reservation | None
 
 
-def _get_open_loan(db: Session, loan_id: int) -> Loan:
+def _get_open_loan(db: Session, loan_id: int, member_id: int | None = None) -> Loan:
     loan = repo.lock_loan(db, loan_id)
     if loan is None:
         raise AppError(ErrorCode.NOT_FOUND, "Ödünç kaydı bulunamadı.", 404)
+    if member_id is not None and loan.member_id != member_id:
+        raise AppError(ErrorCode.FORBIDDEN, "Bu ödünç kaydı size ait değil.", 403)
     if loan.status not in OPEN_LOAN_STATUSES:
         raise AppError(ErrorCode.LOAN_NOT_ACTIVE, "Bu ödünç zaten kapanmış.", 409)
     return loan
@@ -211,10 +213,13 @@ def return_loan(
 # --- Süre uzatma ---
 
 
-def renew_loan(db: Session, loan_id: int, today: date | None = None) -> Loan:
+def renew_loan(
+    db: Session, loan_id: int, today: date | None = None, member_id: int | None = None
+) -> Loan:
+    """member_id verilirse (üye paneli) yalnızca o üyenin ödüncü uzatılabilir."""
     today = today or date.today()
     try:
-        loan = _get_open_loan(db, loan_id)
+        loan = _get_open_loan(db, loan_id, member_id)
         if loan.status == LoanStatus.OVERDUE or loan.due_date < today:
             raise AppError(ErrorCode.LOAN_OVERDUE, "Gecikmiş ödünç uzatılamaz.", 409)
         max_renewals = settings_service.get_int(db, "max_renewals")

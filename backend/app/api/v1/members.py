@@ -26,7 +26,7 @@ router = APIRouter(
 )
 
 
-def _summary_fields(row: MemberRow) -> dict:
+def summary_fields(row: MemberRow) -> dict:
     member = row.member
     return {
         "id": member.id,
@@ -41,10 +41,10 @@ def _summary_fields(row: MemberRow) -> dict:
     }
 
 
-def _detail(db: Session, member_id: int) -> MemberDetail:
+def member_detail(db: Session, member_id: int) -> MemberDetail:
     row = svc.get_member_row(db, member_id)
     return MemberDetail(
-        **_summary_fields(row),
+        **summary_fields(row),
         user_id=row.member.user_id,
         address=row.member.address,
         membership_start=row.member.membership_start,
@@ -52,7 +52,7 @@ def _detail(db: Session, member_id: int) -> MemberDetail:
     )
 
 
-def _loan_out(loan: Loan) -> MemberLoanOut:
+def member_loan_out(loan: Loan) -> MemberLoanOut:
     return MemberLoanOut(
         id=loan.id,
         book_id=loan.copy.book_id,
@@ -66,7 +66,7 @@ def _loan_out(loan: Loan) -> MemberLoanOut:
     )
 
 
-def _reservation_out(reservation: Reservation) -> MemberReservationOut:
+def member_reservation_out(reservation: Reservation) -> MemberReservationOut:
     return MemberReservationOut(
         id=reservation.id,
         book_id=reservation.book_id,
@@ -87,41 +87,41 @@ def list_members(
     size: Annotated[int, Query(ge=1, le=100)] = 20,
 ):
     rows, total = svc.search_members(db, q, status, page, size)
-    items = [MemberSummary(**_summary_fields(row)) for row in rows]
+    items = [MemberSummary(**summary_fields(row)) for row in rows]
     return Page(items=items, total=total, page=page, size=size)
 
 
 @router.get("/{member_id}", response_model=MemberDetail)
 def get_member(member_id: int, db: DbSession):
-    return _detail(db, member_id)
+    return member_detail(db, member_id)
 
 
 @router.post("", response_model=MemberDetail, status_code=201)
 def create_member(body: MemberCreate, db: DbSession):
-    return _detail(db, svc.create_member(db, body).id)
+    return member_detail(db, svc.create_member(db, body).id)
 
 
 @router.put("/{member_id}", response_model=MemberDetail)
 def update_member(member_id: int, body: MemberUpdate, db: DbSession):
     svc.update_member(db, member_id, body)
-    return _detail(db, member_id)
+    return member_detail(db, member_id)
 
 
 @router.post("/{member_id}/suspend", response_model=MemberDetail)
 def suspend_member(member_id: int, db: DbSession):
     svc.suspend_member(db, member_id)
-    return _detail(db, member_id)
+    return member_detail(db, member_id)
 
 
 @router.post("/{member_id}/activate", response_model=MemberDetail)
 def activate_member(member_id: int, db: DbSession):
     svc.activate_member(db, member_id)
-    return _detail(db, member_id)
+    return member_detail(db, member_id)
 
 
 @router.get("/{member_id}/loans", response_model=list[MemberLoanOut])
 def member_loans(member_id: int, db: DbSession, status: LoanStatus | None = None):
-    return [_loan_out(loan) for loan in svc.member_loans(db, member_id, status)]
+    return [member_loan_out(loan) for loan in svc.member_loans(db, member_id, status)]
 
 
 @router.get("/{member_id}/fines", response_model=list[MemberFineOut])
@@ -131,4 +131,4 @@ def member_fines(member_id: int, db: DbSession):
 
 @router.get("/{member_id}/reservations", response_model=list[MemberReservationOut])
 def member_reservations(member_id: int, db: DbSession):
-    return [_reservation_out(r) for r in svc.member_reservations(db, member_id)]
+    return [member_reservation_out(r) for r in svc.member_reservations(db, member_id)]

@@ -11,10 +11,14 @@ import { LoanListPage } from "./features/loans/LoanListPage";
 import { QuickTransactionPage } from "./features/loans/QuickTransactionPage";
 import { FineListPage } from "./features/reservations/FineListPage";
 import { ReservationListPage } from "./features/reservations/ReservationListPage";
+import { CatalogPage } from "./features/me/CatalogPage";
+import { MyFinesPage } from "./features/me/MyFinesPage";
+import { MyLoansPage } from "./features/me/MyLoansPage";
+import { MyReservationsPage } from "./features/me/MyReservationsPage";
+import { ProfilePage } from "./features/me/ProfilePage";
 import { useAuth } from "./lib/useAuth";
 import { homePathFor, STAFF_ROLES } from "./lib/roles";
 import { LoginPage } from "./pages/LoginPage";
-import { MemberHomePage } from "./pages/MemberHomePage";
 import { StaffHomePage } from "./pages/StaffHomePage";
 
 function HomeRedirect() {
@@ -44,7 +48,11 @@ export function AppRoutes() {
             <Route path="/uyeler/:id/duzenle" element={<MemberFormPage />} />
           </Route>
           <Route element={<ProtectedRoute roles={["member"]} />}>
-            <Route path="/hesabim" element={<MemberHomePage />} />
+            <Route path="/hesabim" element={<MyLoansPage />} />
+            <Route path="/katalog" element={<CatalogPage />} />
+            <Route path="/rezervasyonlarim" element={<MyReservationsPage />} />
+            <Route path="/cezalarim" element={<MyFinesPage />} />
+            <Route path="/profil" element={<ProfilePage />} />
           </Route>
         </Route>
       </Route>

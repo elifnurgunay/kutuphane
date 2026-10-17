@@ -11,7 +11,13 @@ const STAFF_MENU = [
   { to: "/kitaplar", label: "Kitaplar" },
   { to: "/uyeler", label: "Üyeler" },
 ];
-const MEMBER_MENU = [{ to: "/hesabim", label: "Hesabım" }];
+const MEMBER_MENU = [
+  { to: "/hesabim", label: "Ödünçlerim" },
+  { to: "/katalog", label: "Katalog" },
+  { to: "/rezervasyonlarim", label: "Rezervasyonlarım" },
+  { to: "/cezalarim", label: "Cezalarım" },
+  { to: "/profil", label: "Profilim" },
+];
 
 export function AppLayout() {
   const { user, logout } = useAuth();

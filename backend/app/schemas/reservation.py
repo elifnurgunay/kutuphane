@@ -12,6 +12,10 @@ class ReservationCreate(BaseModel):
     member_id: int
 
 
+class MyReservationCreate(BaseModel):
+    book_id: int
+
+
 class ReservationOut(BaseModel):
     id: int
     book_id: int

@@ -77,13 +77,16 @@ def create_reservation(
 
 
 def cancel_reservation(
-    db: Session, reservation_id: int, now: datetime | None = None
+    db: Session, reservation_id: int, now: datetime | None = None, member_id: int | None = None
 ) -> Reservation:
+    """member_id verilirse (üye paneli) yalnızca o üyenin rezervasyonu iptal edilebilir."""
     now = now or datetime.now(UTC)
     try:
         reservation = repo.lock(db, reservation_id)
         if reservation is None:
             raise AppError(ErrorCode.NOT_FOUND, "Rezervasyon bulunamadı.", 404)
+        if member_id is not None and reservation.member_id != member_id:
+            raise AppError(ErrorCode.FORBIDDEN, "Bu rezervasyon size ait değil.", 403)
         if reservation.status not in repo.ACTIVE_STATUSES:
             raise AppError(ErrorCode.RESERVATION_NOT_ACTIVE, "Rezervasyon zaten kapanmış.", 409)
         released = (

@@ -305,3 +305,12 @@ def test_eligibility_lists_all_problems(w, db):
         ErrorCode.HAS_OVERDUE,
     ]
     assert (result.active_loan_count, result.loan_limit, result.overdue_count) == (2, 2, 2)
+
+
+def test_member_can_only_renew_own_loan(w):
+    owner, other = w.member(), w.member()
+    loan = w.issue(owner, w.book()[0])
+
+    code = _error_code(svc.renew_loan, w.db, loan.id, today=TODAY, member_id=other.id)
+    assert code == ErrorCode.FORBIDDEN
+    assert svc.renew_loan(w.db, loan.id, today=TODAY, member_id=owner.id).renew_count == 1

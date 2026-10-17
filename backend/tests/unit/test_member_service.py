@@ -193,3 +193,13 @@ def test_search_members(db):
     assert names(q="UYE-000001", status=None) == ["Ayşe Yılmaz"]
     assert names(q=None, status=MemberStatus.SUSPENDED) == ["Ali Çelik"]
     assert names(q=None, status=None) == ["Ayşe Yılmaz", "Ali Çelik"]
+
+
+def test_get_member_for_user(db, make_user):
+    member = svc.create_member(db, _create_in())
+    assert svc.get_member_for_user(db, member.user).id == member.id
+
+    staff = make_user(UserRole.LIBRARIAN)
+    assert _error_code(svc.get_member_for_user, db, staff) == ErrorCode.FORBIDDEN
+    orphan = make_user(UserRole.MEMBER)
+    assert _error_code(svc.get_member_for_user, db, orphan) == ErrorCode.NOT_FOUND

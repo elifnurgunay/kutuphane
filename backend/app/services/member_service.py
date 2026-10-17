@@ -145,3 +145,13 @@ def member_fines(db: Session, member_id: int) -> list[Fine]:
 def member_reservations(db: Session, member_id: int) -> list[Reservation]:
     get_member(db, member_id)
     return member_repository.reservations(db, member_id)
+
+
+def get_member_for_user(db: Session, user: User) -> Member:
+    """Üye paneli: giriş yapan kullanıcının kendi üye kaydı."""
+    if user.role != UserRole.MEMBER:
+        raise AppError(ErrorCode.FORBIDDEN, "Bu sayfa yalnızca üyeler içindir.", 403)
+    member = db.scalar(select(Member).where(Member.user_id == user.id))
+    if member is None:
+        raise AppError(ErrorCode.NOT_FOUND, "Üye kaydınız bulunamadı.", 404)
+    return member
