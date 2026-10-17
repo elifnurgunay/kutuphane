@@ -1,6 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./components/AppLayout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { BookDetailPage } from "./features/books/BookDetailPage";
+import { BookFormPage } from "./features/books/BookFormPage";
+import { BookListPage } from "./features/books/BookListPage";
 import { useAuth } from "./lib/useAuth";
 import { homePathFor, STAFF_ROLES } from "./lib/roles";
 import { LoginPage } from "./pages/LoginPage";
@@ -20,6 +23,10 @@ export function AppRoutes() {
         <Route element={<AppLayout />}>
           <Route element={<ProtectedRoute roles={STAFF_ROLES} />}>
             <Route path="/panel" element={<StaffHomePage />} />
+            <Route path="/kitaplar" element={<BookListPage />} />
+            <Route path="/kitaplar/yeni" element={<BookFormPage />} />
+            <Route path="/kitaplar/:id" element={<BookDetailPage />} />
+            <Route path="/kitaplar/:id/duzenle" element={<BookFormPage />} />
           </Route>
           <Route element={<ProtectedRoute roles={["member"]} />}>
             <Route path="/hesabim" element={<MemberHomePage />} />

@@ -15,11 +15,19 @@ if config.config_file_name is not None:
 
 target_metadata = Base.metadata
 
+# Yalnızca migration'da tanımlı, veritabanına özel indeksler (modelde yok).
+MIGRATION_ONLY_INDEXES = {"ix_books_title_trgm"}
+
+
+def include_object(obj, name, type_, reflected, compare_to) -> bool:
+    return not (type_ == "index" and name in MIGRATION_ONLY_INDEXES)
+
 
 def run_migrations_offline() -> None:
     context.configure(
         url=settings.database_url,
         target_metadata=target_metadata,
+        include_object=include_object,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         render_as_batch=True,
@@ -38,6 +46,7 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
+            include_object=include_object,
             # SQLite ALTER TABLE kısıtları için
             render_as_batch=connection.dialect.name == "sqlite",
         )

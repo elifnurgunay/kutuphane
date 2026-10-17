@@ -2,7 +2,10 @@ import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../lib/useAuth";
 import { ROLE_LABELS, STAFF_ROLES } from "../lib/roles";
 
-const STAFF_MENU = [{ to: "/panel", label: "Gösterge Paneli" }];
+const STAFF_MENU = [
+  { to: "/panel", label: "Gösterge Paneli" },
+  { to: "/kitaplar", label: "Kitaplar" },
+];
 const MEMBER_MENU = [{ to: "/hesabim", label: "Hesabım" }];
 
 export function AppLayout() {
