@@ -10,7 +10,17 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-from app.services.settings_service import DEFAULT_SETTINGS
+# Bu migration'ın eklediği varsayılanlar (sonradan eklenen anahtarlar kendi migration'larında).
+INITIAL_SETTINGS = {
+    "loan_days": "15",
+    "max_loans_student": "3",
+    "max_loans_staff": "5",
+    "max_loans_public": "2",
+    "daily_fine": "2.00",
+    "max_renewals": "1",
+    "reservation_hold_days": "3",
+    "max_unpaid_fine": "50.00",
+}
 
 
 # revision identifiers, used by Alembic.
@@ -190,7 +200,7 @@ def upgrade() -> None:
     # ### end Alembic commands ###
 
     settings_table = sa.table('settings', sa.column('key', sa.String), sa.column('value', sa.String))
-    op.bulk_insert(settings_table, [{'key': k, 'value': v} for k, v in DEFAULT_SETTINGS.items()])
+    op.bulk_insert(settings_table, [{'key': k, 'value': v} for k, v in INITIAL_SETTINGS.items()])
 
 
 def downgrade() -> None:

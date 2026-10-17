@@ -7,6 +7,8 @@ import { BookListPage } from "./features/books/BookListPage";
 import { MemberDetailPage } from "./features/members/MemberDetailPage";
 import { MemberFormPage } from "./features/members/MemberFormPage";
 import { MemberListPage } from "./features/members/MemberListPage";
+import { LoanListPage } from "./features/loans/LoanListPage";
+import { QuickTransactionPage } from "./features/loans/QuickTransactionPage";
 import { useAuth } from "./lib/useAuth";
 import { homePathFor, STAFF_ROLES } from "./lib/roles";
 import { LoginPage } from "./pages/LoginPage";
@@ -26,6 +28,8 @@ export function AppRoutes() {
         <Route element={<AppLayout />}>
           <Route element={<ProtectedRoute roles={STAFF_ROLES} />}>
             <Route path="/panel" element={<StaffHomePage />} />
+            <Route path="/islem" element={<QuickTransactionPage />} />
+            <Route path="/oduncler" element={<LoanListPage />} />
             <Route path="/kitaplar" element={<BookListPage />} />
             <Route path="/kitaplar/yeni" element={<BookFormPage />} />
             <Route path="/kitaplar/:id" element={<BookDetailPage />} />

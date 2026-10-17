@@ -4,6 +4,8 @@ import { ROLE_LABELS, STAFF_ROLES } from "../lib/roles";
 
 const STAFF_MENU = [
   { to: "/panel", label: "Gösterge Paneli" },
+  { to: "/islem", label: "Hızlı İşlem" },
+  { to: "/oduncler", label: "Ödünçler" },
   { to: "/kitaplar", label: "Kitaplar" },
   { to: "/uyeler", label: "Üyeler" },
 ];

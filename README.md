@@ -36,6 +36,13 @@ python -m app.seed            # örnek veri: 1 admin, 2 görevli, 20 üye, 100 k
 uvicorn app.main:app --reload # http://localhost:8000
 ```
 
+Eşzamanlılık testini gerçek PostgreSQL satır kilidiyle de çalıştırmak için
+Docker'daki veritabanında `kutuphane_test` adlı boş bir veritabanı oluşturup:
+
+```bash
+TEST_POSTGRES_URL=postgresql+psycopg://kutuphane:kutuphane@localhost:5433/kutuphane_test pytest tests/unit/test_loan_concurrency.py
+```
+
 Model değişince yeni migration:
 
 ```bash

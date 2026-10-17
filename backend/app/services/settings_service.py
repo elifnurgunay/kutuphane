@@ -17,6 +17,8 @@ DEFAULT_SETTINGS: dict[str, str] = {
     "max_renewals": "1",
     "reservation_hold_days": "3",
     "max_unpaid_fine": "50.00",
+    # Kayıp kitap cezası
+    "lost_book_fine": "150.00",
 }
 
 
