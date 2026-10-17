@@ -1,0 +1,62 @@
+from enum import StrEnum
+
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
+
+class ErrorCode(StrEnum):
+    VALIDATION_ERROR = "VALIDATION_ERROR"
+    NOT_FOUND = "NOT_FOUND"
+    NOT_AUTHENTICATED = "NOT_AUTHENTICATED"
+    INVALID_CREDENTIALS = "INVALID_CREDENTIALS"
+    INVALID_TOKEN = "INVALID_TOKEN"
+    USER_INACTIVE = "USER_INACTIVE"
+    FORBIDDEN = "FORBIDDEN"
+    WRONG_PASSWORD = "WRONG_PASSWORD"
+    SETTING_MISSING = "SETTING_MISSING"
+    MEMBER_INACTIVE = "MEMBER_INACTIVE"
+    LOAN_LIMIT_EXCEEDED = "LOAN_LIMIT_EXCEEDED"
+    UNPAID_FINES = "UNPAID_FINES"
+    HAS_OVERDUE = "HAS_OVERDUE"
+    COPY_NOT_AVAILABLE = "COPY_NOT_AVAILABLE"
+    RENEW_LIMIT = "RENEW_LIMIT"
+    RESERVATION_EXISTS = "RESERVATION_EXISTS"
+    BOOK_AVAILABLE_NO_RESERVATION = "BOOK_AVAILABLE_NO_RESERVATION"
+
+
+class AppError(Exception):
+    def __init__(self, code: ErrorCode, message: str, status_code: int = 400) -> None:
+        super().__init__(message)
+        self.code = code
+        self.message = message
+        self.status_code = status_code
+
+
+def error_body(code: str, message: str) -> dict:
+    return {"error": {"code": code, "message": message}}
+
+
+_HTTP_STATUS_CODES = {
+    401: (ErrorCode.NOT_AUTHENTICATED, "Oturum açmanız gerekiyor."),
+    403: (ErrorCode.FORBIDDEN, "Bu işlem için yetkiniz yok."),
+    404: (ErrorCode.NOT_FOUND, "Kayıt bulunamadı."),
+}
+
+
+def register_error_handlers(app: FastAPI) -> None:
+    @app.exception_handler(AppError)
+    async def _app_error(_request: Request, exc: AppError) -> JSONResponse:
+        return JSONResponse(error_body(exc.code, exc.message), status_code=exc.status_code)
+
+    @app.exception_handler(RequestValidationError)
+    async def _validation_error(_request: Request, _exc: RequestValidationError) -> JSONResponse:
+        return JSONResponse(
+            error_body(ErrorCode.VALIDATION_ERROR, "Gönderilen veri geçersiz."), status_code=422
+        )
+
+    @app.exception_handler(StarletteHTTPException)
+    async def _http_error(_request: Request, exc: StarletteHTTPException) -> JSONResponse:
+        code, message = _HTTP_STATUS_CODES.get(exc.status_code, ("HTTP_ERROR", str(exc.detail)))
+        return JSONResponse(error_body(code, message), status_code=exc.status_code)

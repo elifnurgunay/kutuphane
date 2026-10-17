@@ -14,5 +14,10 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./kutuphane.db"
     cors_origins: list[str] = ["http://localhost:5173"]
 
+    jwt_secret: str = "dev-secret-change-me"
+    jwt_algorithm: str = "HS256"
+    access_token_minutes: int = 30
+    refresh_token_days: int = 7
+
 
 settings = Settings()

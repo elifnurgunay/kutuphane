@@ -9,7 +9,10 @@ Kitap, üye, ödünç, iade, rezervasyon ve gecikme cezası süreçlerini yönet
 ```bash
 cp .env.example .env
 docker compose up --build
+docker compose exec backend python -m app.seed   # örnek veri (yalnızca ilk kez)
 ```
+
+Backend konteyneri açılışta `alembic upgrade head` çalıştırır.
 
 | Servis | Adres |
 |---|---|
@@ -26,7 +29,15 @@ cd backend
 python -m venv .venv
 .venv/Scripts/activate        # Linux/macOS: source .venv/bin/activate
 pip install -e ".[dev]"
+alembic upgrade head          # şemayı ve varsayılan ayarları oluşturur (SQLite: kutuphane.db)
+python -m app.seed            # örnek veri: 1 admin, 2 görevli, 20 üye, 100 kitap, 250 nüsha
 uvicorn app.main:app --reload # http://localhost:8000
+```
+
+Model değişince yeni migration:
+
+```bash
+alembic revision --autogenerate -m "aciklama"
 ```
 
 Test ve lint:
@@ -53,3 +64,13 @@ npm run lint
 npm run format
 npm run build
 ```
+
+## Varsayılan giriş bilgileri (seed)
+
+Yalnızca geliştirme içindir.
+
+| Rol | E-posta | Şifre |
+|---|---|---|
+| Yönetici | admin@kutuphane.local | Admin123! |
+| Görevli | gorevli1@kutuphane.local, gorevli2@kutuphane.local | Gorevli123! |
+| Üye | ayse.yilmaz@kutuphane.local (ve diğer 19 üye, `ad.soyad@kutuphane.local`) | Uye12345! |
