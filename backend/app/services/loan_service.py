@@ -16,7 +16,7 @@ from app.models.enums import CopyStatus, LoanStatus, MemberStatus, ReservationSt
 from app.repositories import loan_repository as repo
 from app.repositories import member_repository
 from app.repositories.member_repository import OPEN_LOAN_STATUSES
-from app.services import fine_service, settings_service
+from app.services import fine_service, reservation_service, settings_service
 
 # --- Uygunluk (ödünç kuralları 1-4) ---
 
@@ -200,17 +200,7 @@ def return_loan(
             if damage:
                 fines.append(damage)
         else:
-            reservation = repo.next_waiting_reservation(db, copy.book_id)
-            if reservation is not None:
-                hold_days = settings_service.get_int(db, "reservation_hold_days")
-                reservation.status = ReservationStatus.READY
-                reservation.ready_at = now
-                reservation.expires_at = now + timedelta(days=hold_days)
-                reservation.assigned_copy_id = copy.id
-                copy.status = CopyStatus.RESERVED
-                # Üyeye bildirim: bildirim altyapısı (e-posta) Faz 8'de opsiyonel.
-            else:
-                copy.status = CopyStatus.AVAILABLE
+            reservation = reservation_service.assign_copy_to_next(db, copy, now)
         db.commit()
         return ReturnResult(loan=loan, fines=fines, reservation=reservation)
     except Exception:

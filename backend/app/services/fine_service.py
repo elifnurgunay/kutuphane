@@ -1,12 +1,14 @@
-"""Ceza hesaplama ve oluşturma (ödeme / affetme Faz 5'te)."""
+"""Ceza hesaplama, oluşturma, tahsilat ve affetme."""
 
-from datetime import date
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
-from app.models import Fine, Loan
+from app.core.errors import AppError, ErrorCode
+from app.models import Fine, Loan, User
 from app.models.enums import FineReason, FineStatus
+from app.repositories import fine_repository
 from app.services import settings_service
 
 
@@ -50,3 +52,48 @@ def create_damage_fine(db: Session, loan: Loan, amount: Decimal) -> Fine | None:
     if amount <= 0:
         return None
     return _add_fine(db, loan, amount.quantize(Decimal("0.01")), FineReason.DAMAGED)
+
+
+# --- Tahsilat / affetme ---
+
+
+def get_fine(db: Session, fine_id: int) -> Fine:
+    fine = fine_repository.get_with_details(db, fine_id)
+    if fine is None:
+        raise AppError(ErrorCode.NOT_FOUND, "Ceza bulunamadı.", 404)
+    return fine
+
+
+def _close_fine(
+    db: Session, fine_id: int, staff: User, status: FineStatus, now: datetime | None
+) -> Fine:
+    try:
+        fine = fine_repository.lock(db, fine_id)
+        if fine is None:
+            raise AppError(ErrorCode.NOT_FOUND, "Ceza bulunamadı.", 404)
+        if fine.status != FineStatus.UNPAID:
+            raise AppError(ErrorCode.FINE_NOT_UNPAID, "Bu ceza zaten kapatılmış.", 409)
+        fine.status = status
+        fine.paid_at = now or datetime.now(UTC)
+        fine.collected_by = staff.id
+        db.commit()
+        return fine
+    except Exception:
+        db.rollback()
+        raise
+
+
+def pay_fine(db: Session, fine_id: int, staff: User, now: datetime | None = None) -> Fine:
+    """Görevli tahsilatı kaydeder (online ödeme kapsam dışı)."""
+    return _close_fine(db, fine_id, staff, FineStatus.PAID, now)
+
+
+def waive_fine(db: Session, fine_id: int, admin: User, now: datetime | None = None) -> Fine:
+    """Cezayı affeder; yetki kontrolü (yalnız admin) uç noktadadır."""
+    return _close_fine(db, fine_id, admin, FineStatus.WAIVED, now)
+
+
+def search_fines(
+    db: Session, status: FineStatus | None, member_id: int | None, page: int, size: int
+) -> tuple[list[Fine], int, Decimal]:
+    return fine_repository.search(db, status, member_id, page, size)

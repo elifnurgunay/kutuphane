@@ -21,6 +21,7 @@ import {
   type Copy,
   type ManualCopyStatus,
 } from "./api";
+import { BookReservationsSection } from "../reservations/BookReservationsSection";
 import { CopyStatusBadge } from "./CopyStatusBadge";
 
 const LOCKED_STATUSES = ["loaned", "reserved"];
@@ -92,6 +93,7 @@ export function BookDetailPage() {
       </Card>
 
       <CopiesSection bookId={bookId} />
+      <BookReservationsSection bookId={bookId} canReserve={data.available_count === 0} />
     </div>
   );
 }

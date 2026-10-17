@@ -6,6 +6,8 @@ const STAFF_MENU = [
   { to: "/panel", label: "Gösterge Paneli" },
   { to: "/islem", label: "Hızlı İşlem" },
   { to: "/oduncler", label: "Ödünçler" },
+  { to: "/rezervasyonlar", label: "Rezervasyonlar" },
+  { to: "/cezalar", label: "Cezalar" },
   { to: "/kitaplar", label: "Kitaplar" },
   { to: "/uyeler", label: "Üyeler" },
 ];

@@ -9,6 +9,8 @@ import { MemberFormPage } from "./features/members/MemberFormPage";
 import { MemberListPage } from "./features/members/MemberListPage";
 import { LoanListPage } from "./features/loans/LoanListPage";
 import { QuickTransactionPage } from "./features/loans/QuickTransactionPage";
+import { FineListPage } from "./features/reservations/FineListPage";
+import { ReservationListPage } from "./features/reservations/ReservationListPage";
 import { useAuth } from "./lib/useAuth";
 import { homePathFor, STAFF_ROLES } from "./lib/roles";
 import { LoginPage } from "./pages/LoginPage";
@@ -30,6 +32,8 @@ export function AppRoutes() {
             <Route path="/panel" element={<StaffHomePage />} />
             <Route path="/islem" element={<QuickTransactionPage />} />
             <Route path="/oduncler" element={<LoanListPage />} />
+            <Route path="/rezervasyonlar" element={<ReservationListPage />} />
+            <Route path="/cezalar" element={<FineListPage />} />
             <Route path="/kitaplar" element={<BookListPage />} />
             <Route path="/kitaplar/yeni" element={<BookFormPage />} />
             <Route path="/kitaplar/:id" element={<BookDetailPage />} />

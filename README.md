@@ -22,6 +22,16 @@ Backend konteyneri açılışta `alembic upgrade head` çalıştırır. Veritaba
 | API | http://localhost:8000 (Swagger: `/docs`, sağlık: `/health`) |
 | PostgreSQL | localhost:5433 (`kutuphane_db`) |
 
+## Günlük görev
+
+Gecikmiş ödünçleri işaretler, teslim alınmayan rezervasyonları düşürüp sıradakine geçirir ve
+süresi dolan üyelikleri kapatır. Docker'da backend içinde açılışta ve her gece 00:05'te
+(konteyner saati UTC) kendiliğinden çalışır (`RUN_DAILY_JOBS=true`). Elle çalıştırmak için:
+
+```bash
+python -m app.jobs.daily
+```
+
 ## Yerel geliştirme
 
 ### Backend (Python 3.12)

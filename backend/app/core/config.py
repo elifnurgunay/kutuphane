@@ -19,5 +19,8 @@ class Settings(BaseSettings):
     access_token_minutes: int = 30
     refresh_token_days: int = 7
 
+    # Günlük görevi (gecikme, rezervasyon ve üyelik süreleri) backend içinde çalıştır
+    run_daily_jobs: bool = False
+
 
 settings = Settings()
