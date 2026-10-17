@@ -131,3 +131,25 @@ def test_require_roles(client, db, make_user):
     forbidden = probe.get("/staff-only", headers=_auth(member_token))
     assert forbidden.status_code == 403
     assert forbidden.json()["error"]["code"] == "FORBIDDEN"
+
+
+def test_validation_messages_are_turkish(client, make_user):
+    make_user(email="kisi@test.local")
+    tokens = _login(client, "kisi@test.local").json()
+
+    response = client.post(
+        f"{PREFIX}/change-password",
+        headers=_auth(tokens["access_token"]),
+        json={"current_password": DEFAULT_PASSWORD, "new_password": "kisa"},
+    )
+    error = response.json()["error"]
+    assert error["message"] == "Yeni şifre en az 8 karakter olmalı."
+    assert error["details"] == [{"field": "Yeni şifre", "message": error["message"]}]
+
+    missing = client.post(f"{PREFIX}/login", json={"email": "kisi@test.local"})
+    assert missing.json()["error"]["message"] == "Şifre zorunlu."
+
+
+def test_unknown_route_and_method_are_turkish(client):
+    assert client.get("/api/v1/yok").json()["error"]["message"] == "Kayıt bulunamadı."
+    assert client.get(f"{PREFIX}/login").json()["error"]["message"] == "Bu işlem desteklenmiyor."

@@ -5,6 +5,7 @@ from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.core import audit
 from app.core.db import get_db
 from app.core.errors import AppError, ErrorCode
 from app.models import User
@@ -22,7 +23,9 @@ def get_current_user(
 ) -> User:
     if credentials is None:
         raise AppError(ErrorCode.NOT_AUTHENTICATED, "Oturum açmanız gerekiyor.", 401)
-    return auth_service.get_user_from_access_token(db, credentials.credentials)
+    user = auth_service.get_user_from_access_token(db, credentials.credentials)
+    audit.set_actor(db, user.id)
+    return user
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]

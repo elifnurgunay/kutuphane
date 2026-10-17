@@ -5,6 +5,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.core.validation_messages import translate
+
 
 class ErrorCode(StrEnum):
     VALIDATION_ERROR = "VALIDATION_ERROR"
@@ -58,6 +60,7 @@ _HTTP_STATUS_CODES = {
     401: (ErrorCode.NOT_AUTHENTICATED, "Oturum açmanız gerekiyor."),
     403: (ErrorCode.FORBIDDEN, "Bu işlem için yetkiniz yok."),
     404: (ErrorCode.NOT_FOUND, "Kayıt bulunamadı."),
+    405: ("METHOD_NOT_ALLOWED", "Bu işlem desteklenmiyor."),
 }
 
 
@@ -67,12 +70,21 @@ def register_error_handlers(app: FastAPI) -> None:
         return JSONResponse(error_body(exc.code, exc.message), status_code=exc.status_code)
 
     @app.exception_handler(RequestValidationError)
-    async def _validation_error(_request: Request, _exc: RequestValidationError) -> JSONResponse:
-        return JSONResponse(
-            error_body(ErrorCode.VALIDATION_ERROR, "Gönderilen veri geçersiz."), status_code=422
-        )
+    async def _validation_error(_request: Request, exc: RequestValidationError) -> JSONResponse:
+        details = translate(list(exc.errors()))
+        message = details[0]["message"] if details else "Gönderilen veri geçersiz."
+        body = error_body(ErrorCode.VALIDATION_ERROR, message)
+        body["error"]["details"] = details
+        return JSONResponse(body, status_code=422)
 
     @app.exception_handler(StarletteHTTPException)
     async def _http_error(_request: Request, exc: StarletteHTTPException) -> JSONResponse:
-        code, message = _HTTP_STATUS_CODES.get(exc.status_code, ("HTTP_ERROR", str(exc.detail)))
+        code, message = _HTTP_STATUS_CODES.get(exc.status_code, ("HTTP_ERROR", "İstek işlenemedi."))
         return JSONResponse(error_body(code, message), status_code=exc.status_code)
+
+    @app.exception_handler(Exception)
+    async def _unexpected(_request: Request, _exc: Exception) -> JSONResponse:
+        return JSONResponse(
+            error_body("INTERNAL_ERROR", "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin."),
+            status_code=500,
+        )

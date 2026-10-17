@@ -21,3 +21,6 @@ __all__ = [
     "Setting",
     "User",
 ]
+
+# Audit log dinleyicilerini modeller yüklendiğinde kaydet
+import app.core.audit  # noqa: E402, F401

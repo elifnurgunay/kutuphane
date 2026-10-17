@@ -11,6 +11,7 @@ from datetime import date, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core import audit
 from app.core.db import SessionLocal
 from app.core.security import hash_password
 from app.models import Author, Book, BookCopy, Category, Loan, Member, Publisher, User
@@ -205,6 +206,8 @@ def run(db: Session, today: date | None = None) -> None:
             "Veritabanında zaten kullanıcı var; seed yalnızca boş veritabanında çalışır."
         )
 
+    # Örnek veri yüklemesi audit log'a yazılmaz
+    db.info[audit.DISABLED_KEY] = True
     settings_service.ensure_defaults(db)
     loan_days = settings_service.get_int(db, "loan_days")
 

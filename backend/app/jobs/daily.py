@@ -4,12 +4,13 @@ Elle çalıştırma:  python -m app.jobs.daily
 Backend içinde:   RUN_DAILY_JOBS=true ise her gece otomatik (app/jobs/scheduler.py).
 """
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime
 
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
+from app.core import audit
 from app.core.db import SessionLocal
 from app.models import Loan, Member
 from app.models.enums import LoanStatus, MemberStatus
@@ -47,11 +48,16 @@ def run(db: Session, today: date | None = None, now: datetime | None = None) -> 
     """Görevler tekrar çalıştırılsa da güvenlidir (idempotent)."""
     today = today or date.today()
     now = now or datetime.now(UTC)
-    return DailyResult(
+    result = DailyResult(
         overdue_loans=mark_overdue_loans(db, today),
         expired_reservations=reservation_service.expire_ready_reservations(db, now),
         expired_memberships=expire_memberships(db, today),
     )
+    if any(asdict(result).values()):
+        # Toplu güncellemeler ORM olaylarına düşmez; özet kayıt bırak
+        audit.record(db, "daily_job", "system", asdict(result))
+        db.commit()
+    return result
 
 
 def main() -> None:
