@@ -12,13 +12,15 @@ docker compose up --build
 docker compose exec backend python -m app.seed   # örnek veri (yalnızca ilk kez)
 ```
 
-Backend konteyneri açılışta `alembic upgrade head` çalıştırır.
+Backend konteyneri açılışta `alembic upgrade head` çalıştırır. Veritabanı Türkçe sıralamayla
+(ICU `tr-TR`) oluşturulur; bu ayar yalnızca volume ilk oluşturulurken uygulanır, değiştirmek için
+`docker compose down -v` ile volume silinmelidir (veriler gider).
 
 | Servis | Adres |
 |---|---|
 | Arayüz | http://localhost:8080 |
 | API | http://localhost:8000 (Swagger: `/docs`, sağlık: `/health`) |
-| PostgreSQL | localhost:5432 (`kutuphane_db`) |
+| PostgreSQL | localhost:5433 (`kutuphane_db`) |
 
 ## Yerel geliştirme
 
