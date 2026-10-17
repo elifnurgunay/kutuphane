@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useConfirm } from "../../lib/confirm";
 import { Link, useParams } from "react-router-dom";
 import { Card, EmptyState, ErrorMessage, LoadingState } from "../../components/ui";
 import { formatDate, formatMoney, todayIso } from "../../lib/format";
@@ -24,17 +25,23 @@ export function MemberDetailPage() {
   const memberId = Number(useParams().id);
   const member = useMember(memberId);
   const setStatus = useSetMemberStatus(memberId);
+  const confirm = useConfirm();
 
   if (member.isPending) return <LoadingState />;
   if (member.error) return <ErrorMessage error={member.error} />;
   const data = member.data;
 
-  function changeStatus(action: "suspend" | "activate") {
-    const question =
-      action === "suspend"
-        ? `${data.full_name} askıya alınsın mı? Askıdaki üye kitap alamaz.`
-        : `${data.full_name} yeniden aktifleştirilsin mi?`;
-    if (window.confirm(question)) setStatus.mutate(action);
+  async function changeStatus(action: "suspend" | "activate") {
+    const suspend = action === "suspend";
+    const ok = await confirm({
+      title: suspend ? "Üye askıya alınsın mı?" : "Üye aktifleştirilsin mi?",
+      message: suspend
+        ? `${data.full_name} askıdayken kitap alamaz.`
+        : `${data.full_name} yeniden kitap alabilecek.`,
+      confirmLabel: suspend ? "Askıya al" : "Aktifleştir",
+      tone: suspend ? "danger" : "default",
+    });
+    if (ok) setStatus.mutate(action);
   }
 
   const details: [string, string][] = [
@@ -68,7 +75,7 @@ export function MemberDetailPage() {
                 type="button"
                 className={dangerButton}
                 disabled={setStatus.isPending}
-                onClick={() => changeStatus("suspend")}
+                onClick={() => void changeStatus("suspend")}
               >
                 Askıya al
               </button>
@@ -77,7 +84,7 @@ export function MemberDetailPage() {
                 type="button"
                 className={secondaryButton}
                 disabled={setStatus.isPending}
-                onClick={() => changeStatus("activate")}
+                onClick={() => void changeStatus("activate")}
               >
                 Aktifleştir
               </button>

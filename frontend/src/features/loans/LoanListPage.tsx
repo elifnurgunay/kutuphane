@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useConfirm } from "../../lib/confirm";
 import { Link, useSearchParams } from "react-router-dom";
 import { Card, EmptyState, ErrorMessage, LoadingState, Pagination } from "../../components/ui";
 import { formatDate, formatMoney, todayIso } from "../../lib/format";
@@ -130,6 +131,7 @@ function LoanRow({
   const returnLoan = useReturnLoan();
   const renewLoan = useRenewLoan();
   const markLost = useMarkLost();
+  const confirm = useConfirm();
   const busy = returnLoan.isPending || renewLoan.isPending || markLost.isPending;
 
   async function run(action: () => Promise<string>) {
@@ -199,13 +201,14 @@ function LoanRow({
               type="button"
               className={dangerButton}
               disabled={busy}
-              onClick={() => {
-                if (
-                  !window.confirm(
-                    `"${loan.book_title}" kayıp olarak işaretlensin mi? Üyeye kayıp cezası yazılır.`,
-                  )
-                )
-                  return;
+              onClick={async () => {
+                const ok = await confirm({
+                  title: "Kayıp olarak işaretlensin mi?",
+                  message: `"${loan.book_title}" kayıp sayılacak ve ${loan.member_name} adına kayıp cezası yazılacak.`,
+                  confirmLabel: "Kayıp işaretle",
+                  tone: "danger",
+                });
+                if (!ok) return;
                 void run(async () => {
                   const { fine } = await markLost.mutateAsync(loan.id);
                   return `Kayıp olarak işaretlendi. Ceza: ${formatMoney(fine.amount)}.`;

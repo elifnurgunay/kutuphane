@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useConfirm } from "../../lib/confirm";
 import { Card, EmptyState, ErrorMessage, LoadingState } from "../../components/ui";
 import { formatDate } from "../../lib/format";
 import { dangerButton, errorMessage } from "../../lib/ui";
@@ -10,6 +11,7 @@ const ACTIVE = ["waiting", "ready"];
 export function MyReservationsPage() {
   const reservations = useMyReservations();
   const cancel = useCancelMyReservation();
+  const confirm = useConfirm();
   const [error, setError] = useState<string | null>(null);
 
   if (reservations.isPending) return <LoadingState />;
@@ -52,9 +54,14 @@ export function MyReservationsPage() {
                   type="button"
                   className={dangerButton}
                   disabled={cancel.isPending}
-                  onClick={() => {
-                    if (!window.confirm(`"${r.book_title}" rezervasyonunuz iptal edilsin mi?`))
-                      return;
+                  onClick={async () => {
+                    const ok = await confirm({
+                      title: "Rezervasyon iptal edilsin mi?",
+                      message: `"${r.book_title}" için sıranızı kaybedeceksiniz.`,
+                      confirmLabel: "İptal et",
+                      tone: "danger",
+                    });
+                    if (!ok) return;
                     setError(null);
                     cancel.mutate(r.id, { onError: (e) => setError(errorMessage(e)) });
                   }}

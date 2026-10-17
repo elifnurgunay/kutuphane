@@ -19,6 +19,9 @@ import { MyFinesPage } from "./features/me/MyFinesPage";
 import { MyLoansPage } from "./features/me/MyLoansPage";
 import { MyReservationsPage } from "./features/me/MyReservationsPage";
 import { ProfilePage } from "./features/me/ProfilePage";
+import { AuditLogPage } from "./features/admin/AuditLogPage";
+import { SettingsPage } from "./features/admin/SettingsPage";
+import { StaffPage } from "./features/admin/StaffPage";
 import { useAuth } from "./lib/useAuth";
 import { homePathFor, STAFF_ROLES } from "./lib/roles";
 import { LoginPage } from "./pages/LoginPage";
@@ -75,6 +78,11 @@ export function AppRoutes() {
             <Route path="/uyeler/yeni" element={<MemberFormPage />} />
             <Route path="/uyeler/:id" element={<MemberDetailPage />} />
             <Route path="/uyeler/:id/duzenle" element={<MemberFormPage />} />
+          </Route>
+          <Route element={<ProtectedRoute roles={["admin"]} />}>
+            <Route path="/ayarlar" element={<SettingsPage />} />
+            <Route path="/personel" element={<StaffPage />} />
+            <Route path="/islem-kayitlari" element={<AuditLogPage />} />
           </Route>
           <Route element={<ProtectedRoute roles={["member"]} />}>
             <Route path="/hesabim" element={<MyLoansPage />} />

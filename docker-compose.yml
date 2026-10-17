@@ -24,6 +24,8 @@ services:
       CORS_ORIGINS: '["http://localhost:8080","http://localhost:5173"]'
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
       RUN_DAILY_JOBS: "true"
+      # "bugün" ve gece görevi Türkiye saatine göre
+      TZ: ${TZ:-Europe/Istanbul}
     ports:
       - "8000:8000"
     depends_on:

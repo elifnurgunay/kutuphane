@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useConfirm } from "../../lib/confirm";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Card, EmptyState, ErrorMessage, Field, LoadingState } from "../../components/ui";
@@ -31,13 +32,20 @@ export function BookDetailPage() {
   const navigate = useNavigate();
   const book = useBook(bookId);
   const deleteBook = useDeleteBook();
+  const confirm = useConfirm();
 
   if (book.isPending) return <LoadingState />;
   if (book.error) return <ErrorMessage error={book.error} />;
   const data = book.data;
 
   async function handleDelete() {
-    if (!window.confirm(`"${data.title}" kitabı ve tüm nüshaları silinsin mi?`)) return;
+    const ok = await confirm({
+      title: "Kitap silinsin mi?",
+      message: `"${data.title}" ve tüm nüshaları kalıcı olarak silinecek.`,
+      confirmLabel: "Sil",
+      tone: "danger",
+    });
+    if (!ok) return;
     await deleteBook.mutateAsync(bookId);
     navigate("/kitaplar", { replace: true });
   }

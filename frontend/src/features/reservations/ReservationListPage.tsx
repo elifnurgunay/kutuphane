@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useConfirm } from "../../lib/confirm";
 import { Link, useSearchParams } from "react-router-dom";
 import { Card, EmptyState, ErrorMessage, LoadingState, Pagination } from "../../components/ui";
 import { formatDate } from "../../lib/format";
@@ -112,11 +113,17 @@ function ReservationRow({
   onError: (message: string) => void;
 }) {
   const cancel = useCancelReservation();
+  const confirm = useConfirm();
   const active = tab === "ready" || tab === "waiting";
 
-  function handleCancel() {
-    if (!window.confirm(`${r.member_name} adına "${r.book_title}" rezervasyonu iptal edilsin mi?`))
-      return;
+  async function handleCancel() {
+    const ok = await confirm({
+      title: "Rezervasyon iptal edilsin mi?",
+      message: `${r.member_name} adına "${r.book_title}" rezervasyonu iptal edilecek.`,
+      confirmLabel: "İptal et",
+      tone: "danger",
+    });
+    if (!ok) return;
     cancel.mutate(r.id, { onError: (error) => onError(errorMessage(error)) });
   }
 
@@ -144,7 +151,7 @@ function ReservationRow({
             type="button"
             className={dangerButton}
             disabled={cancel.isPending}
-            onClick={handleCancel}
+            onClick={() => void handleCancel()}
           >
             İptal
           </button>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useConfirm } from "../../lib/confirm";
 import { Link, useSearchParams } from "react-router-dom";
 import { Card, EmptyState, ErrorMessage, LoadingState, Pagination } from "../../components/ui";
 import { formatDate, formatMoney } from "../../lib/format";
@@ -122,14 +123,20 @@ function FineRow({
 }) {
   const { user } = useAuth();
   const closeFine = useCloseFine();
+  const confirm = useConfirm();
 
-  function close(action: "pay" | "waive") {
+  async function close(action: "pay" | "waive") {
     const verb = action === "pay" ? "tahsil edildi" : "affedildi";
     const question =
       action === "pay"
         ? `${fine.member_name} adına ${formatMoney(fine.amount)} tahsil edildi olarak işaretlensin mi?`
         : `${fine.member_name} adına ${formatMoney(fine.amount)} ceza affedilsin mi?`;
-    if (!window.confirm(question)) return;
+    const ok = await confirm({
+      title: action === "pay" ? "Tahsilat kaydedilsin mi?" : "Ceza affedilsin mi?",
+      message: question,
+      confirmLabel: action === "pay" ? "Tahsil et" : "Affet",
+    });
+    if (!ok) return;
     closeFine.mutate(
       { id: fine.id, action },
       {
@@ -161,7 +168,7 @@ function FineRow({
               type="button"
               className={secondaryButton}
               disabled={closeFine.isPending}
-              onClick={() => close("pay")}
+              onClick={() => void close("pay")}
             >
               Tahsil et
             </button>
@@ -170,7 +177,7 @@ function FineRow({
                 type="button"
                 className={outlineButton}
                 disabled={closeFine.isPending}
-                onClick={() => close("waive")}
+                onClick={() => void close("waive")}
               >
                 Affet
               </button>
