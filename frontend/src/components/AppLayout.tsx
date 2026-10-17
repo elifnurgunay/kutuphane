@@ -5,6 +5,7 @@ import { ROLE_LABELS, STAFF_ROLES } from "../lib/roles";
 const STAFF_MENU = [
   { to: "/panel", label: "Gösterge Paneli" },
   { to: "/kitaplar", label: "Kitaplar" },
+  { to: "/uyeler", label: "Üyeler" },
 ];
 const MEMBER_MENU = [{ to: "/hesabim", label: "Hesabım" }];
 

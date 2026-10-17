@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1 import auth, books, catalog, health
+from app.api.v1 import auth, books, catalog, health, members
 
 api_router = APIRouter()
 api_router.include_router(health.router)
@@ -10,3 +10,4 @@ api_router.include_router(books.copies)
 api_router.include_router(catalog.authors)
 api_router.include_router(catalog.publishers)
 api_router.include_router(catalog.categories)
+api_router.include_router(members.router)

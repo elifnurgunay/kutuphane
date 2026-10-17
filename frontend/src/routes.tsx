@@ -4,6 +4,9 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { BookDetailPage } from "./features/books/BookDetailPage";
 import { BookFormPage } from "./features/books/BookFormPage";
 import { BookListPage } from "./features/books/BookListPage";
+import { MemberDetailPage } from "./features/members/MemberDetailPage";
+import { MemberFormPage } from "./features/members/MemberFormPage";
+import { MemberListPage } from "./features/members/MemberListPage";
 import { useAuth } from "./lib/useAuth";
 import { homePathFor, STAFF_ROLES } from "./lib/roles";
 import { LoginPage } from "./pages/LoginPage";
@@ -27,6 +30,10 @@ export function AppRoutes() {
             <Route path="/kitaplar/yeni" element={<BookFormPage />} />
             <Route path="/kitaplar/:id" element={<BookDetailPage />} />
             <Route path="/kitaplar/:id/duzenle" element={<BookFormPage />} />
+            <Route path="/uyeler" element={<MemberListPage />} />
+            <Route path="/uyeler/yeni" element={<MemberFormPage />} />
+            <Route path="/uyeler/:id" element={<MemberDetailPage />} />
+            <Route path="/uyeler/:id/duzenle" element={<MemberFormPage />} />
           </Route>
           <Route element={<ProtectedRoute roles={["member"]} />}>
             <Route path="/hesabim" element={<MemberHomePage />} />
