@@ -62,24 +62,6 @@ Yalnızca geliştirme içindir.
 | ![Raporlar](docs/screenshots/08-raporlar.png) Raporlar | ![Ayarlar](docs/screenshots/09-ayarlar.png) Sistem ayarları |
 | ![Ödünçlerim](docs/screenshots/10-uye-odunclerim.png) Üye paneli: ödünçlerim | ![Katalog](docs/screenshots/11-uye-katalog.png) Üye paneli: katalog |
 
-Mobil görünüm: [12-mobil.png](docs/screenshots/12-mobil.png). Görüntüleri yeniden üretmek için
-(backend ve `npm run dev` çalışırken, bilgisayardaki Edge kullanılır):
-
-```bash
-cd frontend
-node scripts/screenshots.mjs
-```
-
-## Günlük görev
-
-Gecikmiş ödünçleri işaretler, teslim alınmayan rezervasyonları düşürüp sıradakine geçirir ve
-süresi dolan üyelikleri kapatır. Docker'da backend içinde açılışta ve her gece 00:05'te
-(Türkiye saati, `TZ=Europe/Istanbul`) kendiliğinden çalışır (`RUN_DAILY_JOBS=true`).
-Elle çalıştırmak için:
-
-```bash
-python -m app.jobs.daily
-```
 
 ## Yerel geliştirme
 
@@ -101,19 +83,6 @@ Test ve lint:
 pytest
 ruff check .
 ruff format .
-```
-
-Eşzamanlılık testini gerçek PostgreSQL satır kilidiyle de çalıştırmak için
-Docker'daki veritabanında `kutuphane_test` adlı boş bir veritabanı oluşturup:
-
-```bash
-TEST_POSTGRES_URL=postgresql+psycopg://kutuphane:kutuphane@localhost:5433/kutuphane_test pytest tests/unit/test_loan_concurrency.py
-```
-
-Model değişince yeni migration:
-
-```bash
-alembic revision --autogenerate -m "aciklama"
 ```
 
 ### Frontend (Node 22)
